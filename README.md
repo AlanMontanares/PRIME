@@ -15,6 +15,6 @@ Para poder llevar a cabo el entrenamiento se da un ejemplo de como se debe ejecu
 
 ```python
 python train_pasquet.py --train_path datasets\sdss_train.npz --val_path datasets\sdss_val.npz --test_path datasets\sdss_test.npz --epoch 30 --save_files resultados/sdss_128 --seed 48 --num_workers 11 --batch_size 128
-
+```
 
 **NOTA**: El archivo `plot_comparacion_sdss_vs_h2f.ipynb` contiene los graficos de comparaciones obtenidas al usar ambos tipos de datos (Pasquet vs HiPS2FITS).

@@ -35,3 +35,10 @@ En esta carpeta se encuentran diferentes archivos Python los cuales fueron usado
 
 En esta carpeta se encuentran experimentos adicionales ademas de cómo fue realizada la particion de datos con stratify cross-validation. Adicionalmente se adjuntan los indices respectivos de cada imagen como diccionarios (**last_kfolds_idxs.npy**).
 
+
+## REQUIREMENTS:
+
+- `Python 3.10.11`
+- `lightning 2.2.4`
+- `Pytorch 2.2.1`
+- `Version CUDA 12.1` 

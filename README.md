@@ -1,20 +1,37 @@
 # Photometric Redshift Inference via Multi-resolution imaging Evaluation (PRIME)
-## Carpeta `pasquet_vs_hips2fits`
-En esta carpeta se encuentran los resultados obtenidos al entrenar el modelo propuesto por Pasquet et al. 2019, pero usando dos fuentes de datos. La primera son los mismos datos utilizados por Pasquet, y la otra fuente utilizada fue HiPS2FITS. El entrenamiento fue identico para ambos, mismos datasets, mismos hiperparametros, etc.
 
-En esta carpeta se encuentran los siguientes archivos:
-- **`datasets.py`**: Este archivo Python procesa y crea los dataloaders para entrenar el modelo. Los dataloaders quedan dentro de un `LightningDataModule`, el cual contendrá los datasets de entrenamiento, validación y test. El dataset de entrenamiento posee Data-augmentation, el cual consiste en rotaciones aleatorias en 0°, 90°, 180° y 270° grados además de Flips horizontales y verticales. Las imágenes no fueron pre-procesadas.
-- **`model_pasquet.py`**: Este archivo Python contiene el modelo propuesto por Pasquet et al. 2019 en el framework de PyTorch Lightning. La gracia de este framework es que tiene todas las fases necesarias para entrenar en métodos de la misma clase donde creamos el modelo mediante el módulo de Lightning (`LightningModule`). Adicionalmente se agregan 3 métodos:
-  - `on_train_epoch_end()`: En este método, al final de cada época, se guarda la loss de entrenamiento promedio de la época en un diccionario.
-  - `on_validation_epoch_end()`: Cumple el mismo labor que el metodo anterior, pero adicionalmente se van guardando los zphot en validación en cada final de época.
-  - `predict_step()`: Este método es utilizado para predecir los zphot mediante el dataset de test ubicado en el `LightningDataModule`. Ojo, muy importante.
-- **`utils.py`**: En este script se tienen funciones para visualizar los resultados, como curvas de entrenamiento, scatter plot de la regresion, etc.
-- **`train_pasquet.py`**: Finalmente, en este archivo se utilizan todos los scripts anteriores para efectuar el entrenamiento de forma automatica. Para tener mayor control de este se utiliza la libreria **argparse**, mediante la cual se podran modificar todos los hiperparametros del entrenamiento. Adicionalmente, todos los resultados son almacenados en una carpeta ubicada en una direccion entregada por el usuario (en caso de no existir la carpeta se creará automaticamente).
+![Multi-Resolution five levels](other/multi_res.png)
 
-Para poder llevar a cabo el entrenamiento se da un ejemplo de como se debe ejecutar el script `train_pasquet.py`:
+
+
+## Carpeta `models`
+En esta carpeta se encuentran los modelos implementados en Pytorch Lightning, tanto para imágenes de resolucion simple (**`model_pasquet.py`**) como para imagenes en multi-resolución (**`model_prime.py`**).
+
+## Carpeta `train`
+
+En esta carpeta se encuentran archivos Python para entrenar los modelos via terminal. Para tener mayor control de este se utiliza la libreria **argparse**, mediante la cual se podran modificar todos los hiperparametros del entrenamiento. En este caso no se le da una ruta hacia un dataset de test debido a que se aplicó cross-validation. Tambien cabe destacar que se fue entrenando cada fold de forma independiente (una ejecucion de codigo por cada fold).
+
+Adicionalmente se tiene el archivo **`datasets.py`**, el cual procesa y crea los dataloaders para entrenar el modelo. Los dataloaders quedan dentro de un `LightningDataModule`, el cual contendrá los datasets de entrenamiento, validación y test. El dataset de entrenamiento posee Data-augmentation, el cual consiste en rotaciones aleatorias en 0°, 90°, 180° y 270° grados además de Flips horizontales y verticales. Las imágenes no fueron pre-procesadas.
+
+Dicho esto, para poder llevar a cabo el entrenamiento de resolucion simple se debe ejecutar el scripts `train_pasquet_cross_validation.py`:
 
 ```python
-python train_pasquet.py --train_path datasets\sdss_train.npz --val_path datasets\sdss_val.npz --test_path datasets\sdss_test.npz --epoch 30 --save_files resultados/sdss_128 --seed 48 --num_workers 11 --batch_size 128
+python train_pasquet_cross_validation.py --train_path datasets\h2f_train_sdss_kfold1.npz --test_path datasets\h2f_val_sdss_kfold1.npz --img_size 64 --epoch 40 --save_files resultados\h2f_sdss\cv\fold1 --seed 0 --num_workers 4 --batch_size 128
 ```
 
-**NOTA**: El archivo `plot_comparacion_sdss_vs_h2f.ipynb` contiene los graficos de comparaciones obtenidas al usar ambos tipos de datos (Pasquet vs HiPS2FITS).
+## Carpeta `test`
+
+Esta carpeta contiene el archivo **`test.ipynb`**, en el cual se muestran los resultados de todos los experimentos. Las funciones utilizadas para graficar los diversos resultados se encuentran en el archivo **`utils_plot.py`** de la misma carpeta.
+
+## Carpeta `download_data`
+
+En esta carpeta se encuentran diferentes archivos Python los cuales fueron usados para descargar todas las imagenes mediante el uso de *threading*, el cual es util para descargar las imagenes en menor tiempo.
+
+- **`h2f_script_threading_panstamps.py`**: Utilizado para descargar imagenes en resolucion simple del survey Pan-STARRS mediante el uso del servidor *panstamps*.
+- **`h2f_script_threading_simple_res.py`**: Utilizado para descargar imagenes en resolucion simple del survey SDSS mediante el uso del servicio *HiPS2FITS*.
+- **`h2f_script_threading_multiresolution.py`**: Utilizado para descargar imagenes en multi-resolucion del survey SDSS mediante el uso del servicio *HiPS2FITS*.
+
+## Carpeta `others`
+
+En esta carpeta se encuentran experimentos adicionales ademas de cómo fue realizada la particion de datos con stratify cross-validation. Adicionalmente se adjuntan los indices respectivos de cada imagen como diccionarios (**last_kfolds_idxs.npy**).
+
